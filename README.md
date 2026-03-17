@@ -7,9 +7,24 @@ GPS로 이동 경로를 기록하고, 현장에서 메모·사진·매물정보�
 
 ## 빠른 시작
 
+### Docker Compose (권장)
+
 ```bash
 git clone https://github.com/your-username/imgangr.git
 cd imgangr
+docker compose up -d
+# 브라우저에서 http://localhost:8080 접속
+```
+
+포트를 변경하려면:
+
+```bash
+PORT=3000 docker compose up -d
+```
+
+### 로컬 직접 실행
+
+```bash
 python3 -m http.server 8080
 # 브라우저에서 http://localhost:8080 접속
 ```

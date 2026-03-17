@@ -62,3 +62,6 @@ python3 -m http.server 8080
 ## 라이선스
 
 MIT
+
+## 업데이트 예정 
+- Android 앱

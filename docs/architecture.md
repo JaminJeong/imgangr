@@ -60,7 +60,7 @@ showView('home')   → #view-home.active 추가,
 ### 임장 기록 시작
 
 ```
-사용자 입력 (단지명)
+사용자 입력 (지역명 — 구)
   → startSession()
     → Tracker.getCurrentPosition()  [초기 위치 확보]
     → MapManager.initTrackMap()     [지도 초기화]

@@ -48,7 +48,7 @@
 ══════════════════════════════════════════════════════════ -->
 <div id="view-track" class="view">
   <div class="track-header">
-    <div class="track-complex" id="track-complex-name">-</div>
+    <div class="track-complex" id="track-region-name">-</div>
     <div class="track-stats">
       <div class="track-stat">
         <span class="track-stat-val" id="track-duration">00:00</span>
@@ -86,7 +86,7 @@
       type="search"
       class="search-input"
       id="records-search"
-      placeholder="단지명으로 검색…"
+      placeholder="지역명으로 검색…"
     />
   </div>
   <div class="records-list" id="records-list"></div>
@@ -163,12 +163,12 @@
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">단지명 <span style="color:var(--red)">*</span></label>
+        <label class="form-label">지역명 (구) <span style="color:var(--red)">*</span></label>
         <input
           type="text"
           class="form-input"
-          id="input-complex-name"
-          placeholder="예) 래미안원베일리, 아크로리버파크"
+          id="input-region-name"
+          placeholder="예) 강남구, 마포구, 용산구"
         />
       </div>
     </div>
@@ -274,6 +274,10 @@
 
       <!-- 탭: 매물 정보 -->
       <div class="marker-tab-content" data-type="apt">
+        <div class="form-group">
+          <label class="form-label">단지명</label>
+          <input type="text" class="form-input" id="marker-apt-complex" placeholder="예) 래미안원베일리" />
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group">
             <label class="form-label">동</label>

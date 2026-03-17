@@ -51,6 +51,7 @@ async function renderHome() {
   const distEl  = document.getElementById('stat-dist');
   const listEl  = document.getElementById('recent-list');
 
+
   totalEl.textContent = sessions.length;
 
   const totalDist = sessions.reduce((sum, s) => sum + (s.totalDistance || 0), 0);
@@ -80,7 +81,7 @@ function buildSessionCard(s) {
     <div class="session-card" data-id="${s.id}">
       <div class="session-card-header">
         <div>
-          <div class="session-name">${escapeHtml(s.complexName)}</div>
+          <div class="session-name">${escapeHtml(s.regionName || s.complexName || '-')}</div>
           <div class="session-date">${dateStr}</div>
         </div>
         <div class="session-rating">${stars}</div>
@@ -104,7 +105,7 @@ function attachSessionCardListeners(container) {
 
 function openNewSessionModal() {
   document.getElementById('modal-new-session').classList.add('active');
-  document.getElementById('input-complex-name').focus();
+  document.getElementById('input-region-name').focus();
 }
 
 function closeNewSessionModal() {
@@ -112,27 +113,27 @@ function closeNewSessionModal() {
 }
 
 async function startSession() {
-  const complexName = document.getElementById('input-complex-name').value.trim();
-  if (!complexName) {
-    showToast('단지명을 입력해주세요.', 'warning');
+  const regionName = document.getElementById('input-region-name').value.trim();
+  if (!regionName) {
+    showToast('지역명을 입력해주세요.', 'warning');
     return;
   }
 
   // 위치 권한 확인
   try {
     const pos = await Tracker.getCurrentPosition();
-    initTrackingSession(complexName, pos);
+    initTrackingSession(regionName, pos);
   } catch (e) {
     // 위치 없이도 시작 가능 (나중에 GPS 잡힐 때 추적 시작)
     showToast('위치를 가져오는 중입니다…', 'info');
-    initTrackingSession(complexName, null);
+    initTrackingSession(regionName, null);
   }
 }
 
-function initTrackingSession(complexName, initialPos) {
+function initTrackingSession(regionName, initialPos) {
   const session = {
     id: `session_${Date.now()}`,
-    complexName,
+    regionName,
     startTime: Date.now(),
     endTime: null,
     route: [],
@@ -149,7 +150,7 @@ function initTrackingSession(complexName, initialPos) {
   State.trackingPaused = false;
 
   closeNewSessionModal();
-  document.getElementById('input-complex-name').value = '';
+  document.getElementById('input-region-name').value = '';
 
   showView('track');
 
@@ -157,7 +158,7 @@ function initTrackingSession(complexName, initialPos) {
   MapManager.initTrackMap('track-map', initialPos || { lat: 37.5665, lng: 126.9780 });
 
   // 헤더 업데이트
-  document.getElementById('track-complex-name').textContent = complexName;
+  document.getElementById('track-region-name').textContent = regionName;
 
   // 타이머 시작
   startTimer();
@@ -286,6 +287,7 @@ async function openMarkerModal() {
   switchMarkerTab('note');
   document.getElementById('marker-note-text').value = '';
   document.getElementById('marker-photo-preview').innerHTML = '';
+  document.getElementById('marker-apt-complex').value = '';
   document.getElementById('marker-apt-dong').value = '';
   document.getElementById('marker-apt-floor').value = '';
   document.getElementById('marker-apt-size').value = '';
@@ -349,13 +351,14 @@ async function saveMarker() {
 
   } else if (type === 'apt') {
     marker.aptData = {
-      dong:      document.getElementById('marker-apt-dong').value.trim(),
-      floor:     document.getElementById('marker-apt-floor').value.trim(),
-      size:      document.getElementById('marker-apt-size').value.trim(),
-      price:     document.getElementById('marker-apt-price').value.trim(),
-      jeonse:    document.getElementById('marker-apt-jeonse').value.trim(),
-      direction: document.getElementById('marker-apt-direction').value,
-      notes:     document.getElementById('marker-apt-notes').value.trim(),
+      complexName: document.getElementById('marker-apt-complex').value.trim(),
+      dong:        document.getElementById('marker-apt-dong').value.trim(),
+      floor:       document.getElementById('marker-apt-floor').value.trim(),
+      size:        document.getElementById('marker-apt-size').value.trim(),
+      price:       document.getElementById('marker-apt-price').value.trim(),
+      jeonse:      document.getElementById('marker-apt-jeonse').value.trim(),
+      direction:   document.getElementById('marker-apt-direction').value,
+      notes:       document.getElementById('marker-apt-notes').value.trim(),
     };
 
   } else if (type === 'rate') {
@@ -446,7 +449,7 @@ async function renderRecords(query = '') {
   let sessions = await Storage.getSessions();
   if (query) {
     const q = query.toLowerCase();
-    sessions = sessions.filter((s) => s.complexName.toLowerCase().includes(q));
+    sessions = sessions.filter((s) => (s.regionName || s.complexName || '').toLowerCase().includes(q));
   }
 
   const listEl = document.getElementById('records-list');
@@ -463,7 +466,7 @@ async function renderRecords(query = '') {
     <div class="session-card record-card" data-id="${s.id}">
       <div class="session-card-header">
         <div>
-          <div class="session-name">${escapeHtml(s.complexName)}</div>
+          <div class="session-name">${escapeHtml(s.regionName || s.complexName || '-')}</div>
           <div class="session-date">${formatDate(s.startTime)}</div>
         </div>
         <button class="btn-delete-session" data-id="${s.id}" title="삭제">🗑️</button>
@@ -507,7 +510,7 @@ async function openDetailView(sessionId) {
   State.currentDetailMarkers = markers;
 
   // 헤더
-  document.getElementById('detail-title').textContent = session.complexName;
+  document.getElementById('detail-title').textContent = session.regionName || session.complexName || '-';
   document.getElementById('detail-date').textContent  = formatDate(session.startTime);
 
   // 통계
@@ -575,10 +578,11 @@ function buildMarkerPreview(m) {
   if (m.type === 'apt') {
     const a = m.aptData || {};
     const parts = [];
-    if (a.dong)  parts.push(`${a.dong}동`);
-    if (a.floor) parts.push(`${a.floor}층`);
-    if (a.size)  parts.push(`${a.size}평`);
-    if (a.price) parts.push(`매매 ${a.price}`);
+    if (a.complexName) parts.push(a.complexName);
+    if (a.dong)        parts.push(`${a.dong}동`);
+    if (a.floor)       parts.push(`${a.floor}층`);
+    if (a.size)        parts.push(`${a.size}평`);
+    if (a.price)       parts.push(`매매 ${a.price}`);
     return parts.join(' · ') || '매물 정보';
   }
   if (m.type === 'rate') {
@@ -612,6 +616,7 @@ function showDetailMarkerPopup(marker) {
     const a = marker.aptData || {};
     bodyHtml = `
       <table class="popup-table">
+        ${a.complexName ? row('단지명', a.complexName) : ''}
         ${row('동/호', a.dong ? `${a.dong}동` : '-')}
         ${row('층수', a.floor ? `${a.floor}층` : '-')}
         ${row('평형', a.size ? `${a.size}평` : '-')}
@@ -739,7 +744,7 @@ function bindEvents() {
   document.getElementById('btn-new-session').addEventListener('click', openNewSessionModal);
   document.getElementById('btn-cancel-session').addEventListener('click', closeNewSessionModal);
   document.getElementById('btn-start-session').addEventListener('click', startSession);
-  document.getElementById('input-complex-name').addEventListener('keydown', (e) => {
+  document.getElementById('input-region-name').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') startSession();
   });
 

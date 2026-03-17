@@ -18,7 +18,7 @@
 ```js
 {
   id:            String,   // "session_<timestamp>"  PK
-  complexName:   String,   // 단지명. 예) "래미안원베일리"
+  regionName:    String,   // 지역명(구). 예) "강남구", "마포구"
   date:          String,   // "YYYY-MM-DD"
   startTime:     Number,   // Unix timestamp (ms)
   endTime:       Number,   // Unix timestamp (ms) | null (진행 중)
@@ -86,13 +86,14 @@
 {
   ...공통,
   aptData: {
-    dong:      String,   // 동. 예) "101"
-    floor:     String,   // 층. 예) "15"
-    size:      String,   // 평형/㎡. 예) "84"
-    price:     String,   // 매매가. 예) "15억 5,000"
-    jeonse:    String,   // 전세가. 예) "8억"
-    direction: String,   // 방향. 예) "남향"
-    notes:     String,   // 특이사항
+    complexName: String,   // 단지명. 예) "래미안원베일리"  ← 구 단위 임장에서 필수
+    dong:        String,   // 동. 예) "101"
+    floor:       String,   // 층. 예) "15"
+    size:        String,   // 평형/㎡. 예) "84"
+    price:       String,   // 매매가. 예) "15억 5,000"
+    jeonse:      String,   // 전세가. 예) "8억"
+    direction:   String,   // 방향. 예) "남향"
+    notes:       String,   // 특이사항
   },
 }
 ```
@@ -129,11 +130,16 @@
 ## 관계 다이어그램
 
 ```
-sessions 1 ──── N markers
+sessions (구 단위 임장 1회)
+   │  regionName: "강남구"
+   │  1 ──── N markers
    │                 │
    │ id ─────────── sessionId
    │
-   └─ route: Point[]   (세션 내 배열로 내장)
+   └─ route: Point[]        (세션 내 배열로 내장)
+
+markers (apt 타입)
+   └─ aptData.complexName   (방문한 개별 단지명 — 1 세션에 N개 단지 기록 가능)
 ```
 
 ---

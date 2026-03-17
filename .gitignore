@@ -18,6 +18,16 @@ Thumbs.db
 # Docker
 .env
 
+# Android 빌드 산출물
+android/.gradle/
+android/local.properties
+android/app/build/
+android/build/
+*.apk
+*.aab
+*.keystore
+!debug.keystore
+
 # Dependency (향후 빌드 도구 도입 시)
 node_modules/
 dist/

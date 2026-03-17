@@ -1,11 +1,23 @@
 # 임장기록 🏘️
 
-아파트 임장을 위한 위치 기반 트래킹 웹 앱.
+구(區) 단위 아파트 임장을 위한 위치 기반 트래킹 앱.
 
 GPS로 이동 경로를 기록하고, 현장에서 메모·사진·매물정보·평가·음성을 지도 위에 남깁니다.
-빌드 없이 브라우저에서 바로 실행되며, 모든 데이터는 기기 로컬(IndexedDB)에 저장됩니다.
+**Web**과 **Android** 두 가지 플랫폼을 지원합니다.
 
-## 빠른 시작
+## 프로젝트 구조
+
+```
+imgangr/
+├── web/        # 웹 앱 (Vanilla JS + Leaflet.js)
+├── android/    # Android 앱 (Kotlin + WebView)
+├── docs/       # 문서
+└── scripts/    # 유틸리티 스크립트
+```
+
+---
+
+## 웹 앱 실행
 
 ### Docker Compose (권장)
 
@@ -13,10 +25,10 @@ GPS로 이동 경로를 기록하고, 현장에서 메모·사진·매물정보�
 git clone https://github.com/your-username/imgangr.git
 cd imgangr
 docker compose up -d
-# 브라우저에서 http://localhost:8080 접속
+# → http://localhost:8080
 ```
 
-포트를 변경하려면:
+포트 변경:
 
 ```bash
 PORT=3000 docker compose up -d
@@ -25,23 +37,72 @@ PORT=3000 docker compose up -d
 ### 로컬 직접 실행
 
 ```bash
+cd web
 python3 -m http.server 8080
-# 브라우저에서 http://localhost:8080 접속
+# → http://localhost:8080
 ```
 
-> **HTTPS 필요**: GPS·카메라·마이크 기능은 HTTPS 또는 localhost 환경에서만 동작합니다.
+> **HTTPS 필요**: GPS·카메라·마이크는 HTTPS 또는 localhost에서만 동작합니다.
+
+---
+
+## Android 앱 빌드
+
+### 요구사항
+
+- Android Studio Hedgehog (2023.1.1) 이상
+- JDK 17 이상
+- Android SDK 35
+
+### 빌드 방법
+
+```bash
+# Android Studio에서 열기 (권장)
+# File → Open → imgangr/android/
+
+# 또는 커맨드라인
+cd android
+./gradlew assembleDebug
+# → app/build/outputs/apk/debug/app-debug.apk
+```
+
+### 웹 소스 변경 후 Android 에셋 동기화
+
+```bash
+./scripts/sync-android-assets.sh
+```
+
+`web/` 파일을 수정했다면 위 스크립트로 Android 에셋을 갱신한 뒤 재빌드합니다.
+
+---
 
 ## 주요 기능
 
 | 기능 | 설명 |
 |------|------|
-| 📍 경로 추적 | GPS로 실시간 이동 경로 기록 및 지도 표시 |
+| 📍 경로 추적 | 구 단위 GPS 이동 경로 실시간 기록 |
 | 📝 메모 | 위치에 텍스트 메모 첨부 |
-| 📸 사진 | 카메라/갤러리에서 사진 촬영 및 위치 태깅 |
-| 🏠 매물 | 동·층·평형·매매가·전세가·방향 기록 |
+| 📸 사진 | 카메라/갤러리 사진 + 위치 태깅 |
+| 🏠 매물 | 단지명·동·층·평형·매매가·전세가·방향 기록 |
 | ⭐ 평가 | 교통·학군·편의시설·소음·주차·일조량·조망 점수 |
 | 🎙️ 음성 | 현장 음성 메모 녹음 |
-| 📚 아카이브 | 과거 임장 검색 및 지도 경로 재확인 |
+| 📚 아카이브 | 과거 임장 검색 및 경로 재확인 |
+
+---
+
+## 기술 스택
+
+### Web
+- **지도**: [Leaflet.js](https://leafletjs.com/) + OpenStreetMap
+- **저장소**: IndexedDB
+- **서버**: nginx (Docker)
+
+### Android
+- **언어**: Kotlin
+- **WebView**: `WebViewAssetLoader` (https 컨텍스트 — GPS·카메라·마이크 활성화)
+- **권한**: Geolocation · Camera · Record Audio
+
+---
 
 ## 문서
 
@@ -51,17 +112,8 @@ python3 -m http.server 8080
 - [아키텍처](docs/architecture.md)
 - [데이터 모델](docs/data-model.md)
 
-## 기술 스택
-
-- **지도**: [Leaflet.js](https://leafletjs.com/) + OpenStreetMap (무료, API 키 불필요)
-- **저장소**: IndexedDB (브라우저 내장)
-- **위치**: Geolocation API
-- **미디어**: MediaDevices API (카메라·마이크)
-- **빌드 도구**: 없음 (Vanilla HTML/CSS/JS)
+---
 
 ## 라이선스
 
 MIT
-
-## 업데이트 예정 
-- Android 앱

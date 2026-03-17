@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 네트워크 (Leaflet CDN 타일 로드) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- GPS -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- 카메라 (사진 기록) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- 마이크 (음성 메모) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- 하드웨어 미필수 선언 — GPS·카메라·마이크 없는 기기도 설치 허용 -->
+    <uses-feature android:name="android.hardware.location.gps"  android:required="false" />
+    <uses-feature android:name="android.hardware.camera"        android:required="false" />
+    <uses-feature android:name="android.hardware.microphone"    android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Imgangr"
+        android:usesCleartextTraffic="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

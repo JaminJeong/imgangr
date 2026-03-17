@@ -30,9 +30,10 @@ python3 -m http.server 8080
 
 ## 문서
 
+- [서비스 기획서](docs/service-plan.md)
+- [사용법 가이드](docs/usage.md)
 - [프로젝트 구조](docs/project-structure.md)
 - [아키텍처](docs/architecture.md)
-- [사용법 가이드](docs/usage.md)
 - [데이터 모델](docs/data-model.md)
 
 ## 기술 스택

@@ -1,7 +1,7 @@
 services:
   web:
     build:
-      context: ./web
+      context: ../web
       dockerfile: Dockerfile
     image: imgangr:latest
     container_name: imgangr-web

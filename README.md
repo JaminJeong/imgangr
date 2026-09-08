@@ -3,16 +3,14 @@
 구(區) 단위 아파트 임장을 위한 위치 기반 트래킹 앱.
 
 GPS로 이동 경로를 기록하고, 현장에서 메모·사진·매물정보·평가·음성을 지도 위에 남깁니다.
-**Web**과 **Android** 두 가지 플랫폼을 지원합니다.
 
 ## 프로젝트 구조
 
 ```
 imgangr/
 ├── web/        # 웹 앱 (Vanilla JS + Leaflet.js)
-├── android/    # Android 앱 (Kotlin + WebView)
-├── docs/       # 문서
-└── scripts/    # 유틸리티 스크립트
+├── docker/     # Docker Compose 설정
+└── docs/       # 문서
 ```
 
 ---
@@ -23,7 +21,7 @@ imgangr/
 
 ```bash
 git clone https://github.com/your-username/imgangr.git
-cd imgangr
+cd imgangr/docker
 docker compose up -d
 # → http://localhost:8080
 ```
@@ -43,36 +41,6 @@ python3 -m http.server 8080
 ```
 
 > **HTTPS 필요**: GPS·카메라·마이크는 HTTPS 또는 localhost에서만 동작합니다.
-
----
-
-## Android 앱 빌드
-
-### 요구사항
-
-- Android Studio Hedgehog (2023.1.1) 이상
-- JDK 17 이상
-- Android SDK 35
-
-### 빌드 방법
-
-```bash
-# Android Studio에서 열기 (권장)
-# File → Open → imgangr/android/
-
-# 또는 커맨드라인
-cd android
-./gradlew assembleDebug
-# → app/build/outputs/apk/debug/app-debug.apk
-```
-
-### 웹 소스 변경 후 Android 에셋 동기화
-
-```bash
-./scripts/sync-android-assets.sh
-```
-
-`web/` 파일을 수정했다면 위 스크립트로 Android 에셋을 갱신한 뒤 재빌드합니다.
 
 ---
 
@@ -96,11 +64,6 @@ cd android
 - **지도**: [Leaflet.js](https://leafletjs.com/) + OpenStreetMap
 - **저장소**: IndexedDB
 - **서버**: nginx (Docker)
-
-### Android
-- **언어**: Kotlin
-- **WebView**: `WebViewAssetLoader` (https 컨텍스트 — GPS·카메라·마이크 활성화)
-- **권한**: Geolocation · Camera · Record Audio
 
 ---
 

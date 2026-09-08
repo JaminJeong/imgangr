@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-    앱 아이콘 — 파란 원 배경에 집 모양 아이콘
-    Android Studio > Image Asset 으로 교체 권장
--->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="#1D4ED8" />
-</shape>

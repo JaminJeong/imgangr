@@ -2,6 +2,8 @@
 
 본 문서는 **임장기록(Imgangr)**을 일반 사용자가 접속할 수 있도록 배포하는 방법과, 구글 계정 로그인 및 구글 드라이브를 활용한 사용자 데이터 저장 방안(및 그 대안)을 다룹니다. 현재 v1.0은 [백엔드 서버가 없는 정적 웹 앱](backend.md)이므로, 여기서 다루는 로그인·클라우드 저장 기능은 모두 **브라우저에서 직접 호출하는 클라이언트 전용(client-only) 구현**을 전제로 합니다.
 
+> 📌 **구현 현황**: 아래 내용은 `web/js/config.js`(설정), `web/js/cloudSync.js`(로그인·드라이브·대체 백업), `web/index.html`의 설정 모달, `.github/workflows/deploy-pages.yml`로 이미 코드에 반영되어 있습니다. 실제로 동작시키기 위해 남은 수동 설정(Google Cloud Console 클라이언트 ID 발급, GitHub Pages 활성화 등)은 [TASK.md](../TASK.md)에 체크리스트로 정리되어 있습니다.
+
 ---
 
 ## 목차

@@ -8,6 +8,10 @@
 
 ```
 imgangr/
+├── .github/
+│   └── workflows/
+│       └── deploy-pages.yml    # GitHub Pages 자동 배포 워크플로 (web/ 변경 시 트리거)
+│
 ├── docker/                     # Docker Compose 실행 환경
 │   └── docker-compose.yml      # 웹 앱 컨테이너 서비스 정의 (포트, 헬스체크, 재시작)
 │
@@ -18,9 +22,11 @@ imgangr/
 │   ├── css/
 │   │   └── style.css           # 모바일 퍼스트 반응형 스타일 & 디자인 시스템 토큰
 │   └── js/
+│       ├── config.js           # 배포 설정값 (GOOGLE_CLIENT_ID 등)
 │       ├── storage.js          # IndexedDB 로컬 영속화 계층
 │       ├── tracker.js          # Geolocation 기반 GPS 추적 및 거리 계산
 │       ├── mapManager.js       # Leaflet.js 지도 엔진 인스턴스 관리
+│       ├── cloudSync.js        # 구글 로그인/드라이브 백업 및 로컬 백업 대체 수단
 │       └── app.js              # 전역 상태, 뷰 전환, UI 이벤트 컨트롤러
 │
 ├── docs/                       # 프로젝트 기술 및 기획 문서
@@ -35,6 +41,7 @@ imgangr/
 │   └── project-structure.md    # 프로젝트 구조 (본 문서)
 │
 ├── .gitignore                  # Git 버전 관리 제외 규칙
+├── TASK.md                     # 배포/구글 동기화 작업 체크리스트 (수동 설정 항목 포함)
 └── README.md                   # 프로젝트 개요 및 빠른 시작 안내
 ```
 
@@ -64,6 +71,8 @@ imgangr/
 | `js/storage.js` | 브라우저 `IndexedDB`(`imgangr_db`)를 Promise 기반으로 래핑한 로컬 CRUD 데이터 계층 |
 | `js/tracker.js` | `navigator.geolocation` 위치 수신, 50m 노이즈 필터, 3m 이동 필터, Haversine 거리 계산 |
 | `js/mapManager.js` | `Leaflet.js` 기반 지도 생성, 실시간 경로 폴리라인 렌더링, 커스텀 마커 핀 제어 |
+| `js/config.js` | `GOOGLE_CLIENT_ID` 등 배포 환경별 설정값 (배포 전 채워 넣는 자리) |
+| `js/cloudSync.js` | Google Identity Services 로그인, `drive.appdata` 백업/복원, JSON 내보내기/가져오기, File System Access API 로컬 폴더 저장 |
 | `js/app.js` | 앱 전역 상태(`State`) 관리, 화면 전환, 녹음/사진 미디어 처리, 폼 검증, 이벤트 바인딩 |
 
 ### 2.4 문서 디렉토리 (`docs/`)

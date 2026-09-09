@@ -19,6 +19,7 @@
 ══════════════════════════════════════════════════════════ -->
 <div id="view-home" class="view active">
   <div class="home-header">
+    <button class="btn-settings" id="btn-open-settings" title="설정 · 백업">⚙️</button>
     <h1>🏘️ 임장기록</h1>
     <p>아파트 임장을 스마트하게 기록하세요</p>
     <div class="home-stats">
@@ -406,6 +407,61 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     모달: 설정 · 백업/동기화
+══════════════════════════════════════════════════════════ -->
+<div class="modal modal-center" id="modal-settings">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <span class="modal-title">설정 · 백업</span>
+      <button class="modal-close" id="btn-close-settings">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="sync-section">
+        <div class="sync-section-title">☁️ 구글 계정 동기화</div>
+        <div id="google-not-configured" class="sync-hint" hidden>
+          구글 동기화가 아직 설정되지 않았습니다. (<code>web/js/config.js</code>의
+          <code>GOOGLE_CLIENT_ID</code> 설정 필요 — <a href="https://github.com/JaminJeong/imgangr/blob/main/docs/cloud-sync.md" target="_blank" rel="noopener">가이드</a>)
+        </div>
+        <div id="google-sync-controls">
+          <div id="google-signed-out">
+            <div id="google-signin-button"></div>
+          </div>
+          <div id="google-signed-in" class="sync-user-row" hidden>
+            <img id="google-user-avatar" class="sync-user-avatar" alt="" />
+            <div class="sync-user-info">
+              <div id="google-user-name" class="sync-user-name"></div>
+              <div id="google-user-email" class="sync-user-email"></div>
+            </div>
+            <button class="btn-secondary" id="btn-google-signout">로그아웃</button>
+          </div>
+          <div class="sync-btn-row">
+            <button class="btn-secondary" id="btn-drive-backup">드라이브에 백업</button>
+            <button class="btn-secondary" id="btn-drive-restore">드라이브에서 복원</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sync-section">
+        <div class="sync-section-title">💾 로컬 백업 (계정 불필요)</div>
+        <p class="sync-hint">구글 동기화 없이도 언제든 기록을 파일로 저장하거나 복원할 수 있습니다.</p>
+        <div class="sync-btn-row">
+          <button class="btn-secondary" id="btn-export-json">JSON으로 내보내기</button>
+          <label class="btn-secondary btn-file-label">
+            JSON 가져오기
+            <input type="file" id="input-import-json" accept="application/json" style="display:none" />
+          </label>
+        </div>
+        <div class="sync-btn-row">
+          <button class="btn-secondary" id="btn-export-folder" hidden>내 PC 동기화 폴더에 저장</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- 토스트 컨테이너 -->
 <div id="toast-container"></div>
 
@@ -413,9 +469,12 @@
      스크립트
 ══════════════════════════════════════════════════════════ -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/config.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/tracker.js"></script>
 <script src="js/mapManager.js"></script>
+<script src="js/cloudSync.js"></script>
 <script src="js/app.js"></script>
 
 </body>

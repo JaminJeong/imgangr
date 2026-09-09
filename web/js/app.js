@@ -675,6 +675,95 @@ function showTrackMarkerDetail(marker) {
   showToast(`${cfg.emoji} ${cfg.label} 기록`, 'info');
 }
 
+// ── 설정 · 백업/동기화 모달 ──────────────────────────────────
+
+let googleSignInInitialized = false;
+
+function openSettingsModal() {
+  document.getElementById('modal-settings').classList.add('active');
+
+  const googleConfigured = CloudSync.isGoogleConfigured();
+  document.getElementById('google-not-configured').hidden = googleConfigured;
+  document.getElementById('google-sync-controls').hidden = !googleConfigured;
+  document.getElementById('btn-export-folder').hidden = !CloudSync.isFileSystemAccessSupported();
+
+  if (googleConfigured && !googleSignInInitialized) {
+    CloudSync.initGoogleSignIn(document.getElementById('google-signin-button'));
+    googleSignInInitialized = true;
+  }
+  renderSyncStatus();
+}
+
+function closeSettingsModal() {
+  document.getElementById('modal-settings').classList.remove('active');
+}
+
+function renderSyncStatus() {
+  const signedIn = Boolean(CloudSync.currentUser);
+  document.getElementById('google-signed-out').hidden = signedIn;
+  document.getElementById('google-signed-in').hidden = !signedIn;
+
+  if (signedIn) {
+    document.getElementById('google-user-avatar').src = CloudSync.currentUser.picture || '';
+    document.getElementById('google-user-name').textContent = CloudSync.currentUser.name || '';
+    document.getElementById('google-user-email').textContent = CloudSync.currentUser.email || '';
+  }
+}
+
+function onCloudSyncUserChanged() {
+  renderSyncStatus();
+}
+
+async function handleDriveBackup() {
+  try {
+    await CloudSync.backupToDrive();
+    showToast('구글 드라이브에 백업했습니다.', 'success');
+  } catch (e) {
+    showToast(e.message || '백업에 실패했습니다.', 'error');
+  }
+}
+
+async function handleDriveRestore() {
+  if (!confirm('드라이브 백업으로 복원하면 기존 로컬 기록과 병합됩니다. 계속할까요?')) return;
+  try {
+    await CloudSync.restoreFromDrive();
+    showToast('드라이브에서 복원했습니다.', 'success');
+    await renderHome();
+  } catch (e) {
+    showToast(e.message || '복원에 실패했습니다.', 'error');
+  }
+}
+
+async function handleExportJson() {
+  try {
+    await CloudSync.exportJson();
+    showToast('백업 파일을 저장했습니다.', 'success');
+  } catch (e) {
+    showToast(e.message || '내보내기에 실패했습니다.', 'error');
+  }
+}
+
+async function handleImportJson(file) {
+  if (!file) return;
+  if (!confirm('가져온 백업으로 복원하면 기존 로컬 기록과 병합됩니다. 계속할까요?')) return;
+  try {
+    await CloudSync.importJsonFile(file);
+    showToast('백업 파일을 복원했습니다.', 'success');
+    await renderHome();
+  } catch (e) {
+    showToast(e.message || '가져오기에 실패했습니다.', 'error');
+  }
+}
+
+async function handleExportToFolder() {
+  try {
+    await CloudSync.exportToLocalFolder();
+    showToast('선택한 폴더에 저장했습니다.', 'success');
+  } catch (e) {
+    showToast(e.message || '폴더 저장에 실패했습니다.', 'error');
+  }
+}
+
 // ── 별점 표시 ────────────────────────────────────────────────
 
 function updateStarDisplay(val) {
@@ -784,6 +873,19 @@ function bindEvents() {
   // 기록 검색
   document.getElementById('records-search').addEventListener('input', (e) => {
     renderRecords(e.target.value);
+  });
+
+  // 설정 · 백업/동기화
+  document.getElementById('btn-open-settings').addEventListener('click', openSettingsModal);
+  document.getElementById('btn-close-settings').addEventListener('click', closeSettingsModal);
+  document.getElementById('btn-google-signout').addEventListener('click', () => CloudSync.signOut());
+  document.getElementById('btn-drive-backup').addEventListener('click', handleDriveBackup);
+  document.getElementById('btn-drive-restore').addEventListener('click', handleDriveRestore);
+  document.getElementById('btn-export-json').addEventListener('click', handleExportJson);
+  document.getElementById('btn-export-folder').addEventListener('click', handleExportToFolder);
+  document.getElementById('input-import-json').addEventListener('change', (e) => {
+    handleImportJson(e.target.files[0]);
+    e.target.value = '';
   });
 
   // 모달 외부 클릭으로 닫기

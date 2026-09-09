@@ -76,6 +76,7 @@ python3 -m http.server 8080
 - [프론트엔드 기술 명세서](docs/frontend.md)
 - [백엔드 & 인프라 기술 명세서](docs/backend.md)
 - [데이터 모델](docs/data-model.md)
+- [배포 및 구글 클라우드 동기화 가이드](docs/cloud-sync.md)
 - [비전공자를 위한 용어 설명서](docs/glossary.md)
 
 ---

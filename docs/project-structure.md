@@ -30,6 +30,7 @@ imgangr/
 │   ├── data-model.md           # 데이터 모델 및 스토리지 명세
 │   ├── frontend.md             # 프론트엔드 기술 명세서
 │   ├── backend.md              # 백엔드 & 인프라 기술 명세서
+│   ├── cloud-sync.md           # 배포 및 구글 클라우드 동기화 가이드
 │   ├── glossary.md             # 비전공자를 위한 용어 설명서
 │   └── project-structure.md    # 프로젝트 구조 (본 문서)
 │
@@ -75,5 +76,6 @@ imgangr/
 | [`data-model.md`](data-model.md) | IndexedDB 스토어 구조(Session, Marker, Point), 필드 정의 및 백엔드 스키마 매핑 |
 | [`frontend.md`](frontend.md) | 프론트엔드 핵심 기술, Web API(GPS, IDB, Audio, File) 활용법, 모듈 인터페이스 |
 | [`backend.md`](backend.md) | 현재의 Nginx/Docker 서빙 구조 분석, HTTPS 배포 가이드, v2 클라우드 백엔드 설계 |
+| [`cloud-sync.md`](cloud-sync.md) | 정적 호스팅 배포 방법, 구글 로그인(GIS), 구글 드라이브 백업, 대안 저장 방식 |
 | [`glossary.md`](glossary.md) | 비전공자/입문자를 위한 프론트엔드 & 백엔드 핵심 용어 설명 및 일상 비유 |
 | [`project-structure.md`](project-structure.md) | 저장소 전체 파일/폴더 트리 및 구성 요소별 책임 명세 (본 문서) |

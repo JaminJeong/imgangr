@@ -37,6 +37,7 @@ imgangr/
 │   ├── frontend.md             # 프론트엔드 기술 명세서
 │   ├── backend.md              # 백엔드 & 인프라 기술 명세서
 │   ├── backup-and-deploy.md    # 배포 및 데이터 백업/공유 가이드
+│   ├── mobile-ui-plan.md       # 모바일 UI 개선 기획서
 │   ├── glossary.md             # 비전공자를 위한 용어 설명서
 │   └── project-structure.md    # 프로젝트 구조 (본 문서)
 │
@@ -86,5 +87,6 @@ imgangr/
 | [`frontend.md`](frontend.md) | 프론트엔드 핵심 기술, Web API(GPS, IDB, Audio, File) 활용법, 모듈 인터페이스 |
 | [`backend.md`](backend.md) | 현재의 Nginx/Docker 서빙 구조 분석, HTTPS 배포 가이드, v2 클라우드 백엔드 설계 |
 | [`backup-and-deploy.md`](backup-and-deploy.md) | GitHub Pages 배포 방법, 파일 백업/복원, 로컬 폴더 저장, 메일 등으로 공유 |
+| [`mobile-ui-plan.md`](mobile-ui-plan.md) | 데스크톱 프레임 처리, Safe Area(노치/홈 인디케이터) 대응 등 모바일 UI 개선 내역 |
 | [`glossary.md`](glossary.md) | 비전공자/입문자를 위한 프론트엔드 & 백엔드 핵심 용어 설명 및 일상 비유 |
 | [`project-structure.md`](project-structure.md) | 저장소 전체 파일/폴더 트리 및 구성 요소별 책임 명세 (본 문서) |

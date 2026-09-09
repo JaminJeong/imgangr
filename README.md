@@ -80,6 +80,7 @@ python3 -m http.server 8080
 - [백엔드 & 인프라 기술 명세서](docs/backend.md)
 - [데이터 모델](docs/data-model.md)
 - [배포 및 데이터 백업/공유 가이드](docs/backup-and-deploy.md)
+- [모바일 UI 개선 기획서](docs/mobile-ui-plan.md)
 - [비전공자를 위한 용어 설명서](docs/glossary.md)
 
 ---

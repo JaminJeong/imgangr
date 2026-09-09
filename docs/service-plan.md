@@ -13,6 +13,7 @@
 - [백엔드 & 인프라 기술 명세서](backend.md)
 - [데이터 모델](data-model.md)
 - [배포 및 데이터 백업/공유 가이드](backup-and-deploy.md)
+- [모바일 UI 개선 기획서](mobile-ui-plan.md)
 - [사용법 가이드](usage.md)
 - [비전공자를 위한 용어 설명서](glossary.md)
 - [프로젝트 구조](project-structure.md)

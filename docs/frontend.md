@@ -144,7 +144,8 @@ web/
 - 네비게이션 동기화: 하단 바텀 네비게이션(`#bottom-nav`)은 지도 중심 집중 모드인 `track`(추적 중) 및 `detail`(상세보기) 화면에서는 자동으로 숨겨집니다.
 
 ### 5.2 반응형 및 모바일 인터랙션 최적화
-- **SafeArea 대응**: 모바일 노치 및 홈 바를 고려한 뷰포트 패딩과 최대 너비(`480px`) 모바일 레이아웃 제약.
+- **SafeArea 대응**: `viewport-fit=cover` + `env(safe-area-inset-*)`로 노치·홈 인디케이터를 피해 헤더/하단 네비/바텀시트 패딩을 계산합니다.
+- **데스크톱 프레임**: `body`에 `max-width: 480px`와 `transform`(fixed 요소의 컨테이닝 블록을 body로 재정의)을 적용해, 넓은 화면에서도 `.view`/`.bottom-nav`/`.modal`이 body 프레임 안에만 렌더링되도록 제한합니다. 상세 배경은 [모바일 UI 개선 기획서](mobile-ui-plan.md) 참고.
 - **바텀시트 모달 (Bottom Sheet Modal)**:
   - 현장에서 한 손으로 쉽게 여닫을 수 있도록 하단에서 슬라이드 업되는 바텀시트 UI 적용 (`.modal-sheet`).
   - 드래그 핸들 디자인(`.modal-handle`)과 스크롤 영역 격리.

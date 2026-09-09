@@ -60,7 +60,7 @@ $$d = 2R \arcsin\left(\sqrt{\sin^2\left(\frac{\Delta \text{lat}}{2}\right) + \co
 현장의 분위기, 소음, 실시간 생각을 음성으로 신속하게 남기기 위한 오디오 인터페이스입니다.
 
 - **마이크 권한 획득**: `navigator.mediaDevices.getUserMedia({ audio: true })`
-- **스트림 인코딩**: 브라우저 기본 지원 코덱(`audio/webm` 또는 Safari의 호환 포맷)으로 청크를 수집합니다.
+- **스트림 인코딩**: `mimeType`을 지정하지 않고 브라우저 기본 지원 코덱으로 청크를 수집합니다. iOS Safari는 14.5부터 `MediaRecorder`를 지원하지만, 18.4(2025-03) 이전 버전은 `audio/webm`을 생성하지 못하고 MP4/AAC 컨테이너만 지원하므로 재생 호환성이 필요하면 `MediaRecorder.isTypeSupported()`로 사전 분기하는 것이 안전합니다.
 - **DataURL 변환**: 녹음 완료 후 `Blob` 데이터를 `FileReader.readAsDataURL()`을 통해 Base64 문자열로 인코딩하여 IndexedDB에 영구 보관합니다.
 
 ### 3.4 File & FileReader API

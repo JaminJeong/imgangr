@@ -5,6 +5,13 @@
 const DB_NAME = 'imgangr_db';
 const DB_VERSION = 1;
 
+function promisifyRequest(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 const Storage = {
   db: null,
 
@@ -35,31 +42,19 @@ const Storage = {
   },
 
   async saveSession(session) {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('sessions', 'readwrite');
-      const req = tx.objectStore('sessions').put(session);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+    const tx = this.db.transaction('sessions', 'readwrite');
+    await promisifyRequest(tx.objectStore('sessions').put(session));
   },
 
   async getSessions() {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('sessions', 'readonly');
-      const req = tx.objectStore('sessions').getAll();
-      req.onsuccess = () =>
-        resolve(req.result.sort((a, b) => b.startTime - a.startTime));
-      req.onerror = () => reject(req.error);
-    });
+    const tx = this.db.transaction('sessions', 'readonly');
+    const sessions = await promisifyRequest(tx.objectStore('sessions').getAll());
+    return sessions.sort((a, b) => b.startTime - a.startTime);
   },
 
   async getSession(id) {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('sessions', 'readonly');
-      const req = tx.objectStore('sessions').get(id);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    const tx = this.db.transaction('sessions', 'readonly');
+    return promisifyRequest(tx.objectStore('sessions').get(id));
   },
 
   async deleteSession(id) {
@@ -80,32 +75,20 @@ const Storage = {
   },
 
   async saveMarker(marker) {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('markers', 'readwrite');
-      const req = tx.objectStore('markers').put(marker);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+    const tx = this.db.transaction('markers', 'readwrite');
+    await promisifyRequest(tx.objectStore('markers').put(marker));
   },
 
   async getMarkersBySession(sessionId) {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('markers', 'readonly');
-      const req = tx.objectStore('markers')
-        .index('sessionId')
-        .getAll(IDBKeyRange.only(sessionId));
-      req.onsuccess = () =>
-        resolve(req.result.sort((a, b) => a.timestamp - b.timestamp));
-      req.onerror = () => reject(req.error);
-    });
+    const tx = this.db.transaction('markers', 'readonly');
+    const markers = await promisifyRequest(
+      tx.objectStore('markers').index('sessionId').getAll(IDBKeyRange.only(sessionId))
+    );
+    return markers.sort((a, b) => a.timestamp - b.timestamp);
   },
 
   async deleteMarker(id) {
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('markers', 'readwrite');
-      const req = tx.objectStore('markers').delete(id);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+    const tx = this.db.transaction('markers', 'readwrite');
+    await promisifyRequest(tx.objectStore('markers').delete(id));
   },
 };

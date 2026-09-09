@@ -2,6 +2,10 @@
  * mapManager.js
  * Leaflet 지도 관리 (추적 지도 & 상세보기 지도)
  */
+const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_TILE_MAX_ZOOM = 19;
+const ROUTE_LINE_STYLE = { color: '#3B82F6', weight: 4, opacity: 0.85 };
+
 const MapManager = {
   trackMap: null,
   detailMap: null,
@@ -30,20 +34,13 @@ const MapManager = {
     this.trackMarkers = [];
     this.userMarker = null;
 
-    this.trackMap = L.map(containerId, { zoomControl: true, attributionControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(this.trackMap);
+    this.trackMap = this._createMap(containerId);
 
     if (center) {
       this.trackMap.setView([center.lat, center.lng], 17);
     }
 
-    this.trackPolyline = L.polyline([], {
-      color: '#3B82F6',
-      weight: 4,
-      opacity: 0.85,
-    }).addTo(this.trackMap);
+    this.trackPolyline = L.polyline([], ROUTE_LINE_STYLE).addTo(this.trackMap);
 
     return this.trackMap;
   },
@@ -56,12 +53,7 @@ const MapManager = {
 
     // 사용자 위치 마커
     if (!this.userMarker) {
-      const icon = L.divIcon({
-        html: '<div class="user-dot"></div>',
-        className: '',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      });
+      const icon = this._createDivIcon('<div class="user-dot"></div>', 24);
       this.userMarker = L.marker([point.lat, point.lng], { icon }).addTo(this.trackMap);
     } else {
       this.userMarker.setLatLng([point.lat, point.lng]);
@@ -100,40 +92,19 @@ const MapManager = {
     }
     this.detailMarkers = [];
 
-    this.detailMap = L.map(containerId, { zoomControl: true, attributionControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(this.detailMap);
+    this.detailMap = this._createMap(containerId);
 
     // 경로 그리기
     if (session.route && session.route.length > 0) {
       const latlngs = session.route.map((p) => [p.lat, p.lng]);
-      this.detailPolyline = L.polyline(latlngs, {
-        color: '#3B82F6',
-        weight: 4,
-        opacity: 0.8,
-      }).addTo(this.detailMap);
+      this.detailPolyline = L.polyline(latlngs, { ...ROUTE_LINE_STYLE, opacity: 0.8 }).addTo(this.detailMap);
 
-      // 시작점
-      L.marker(latlngs[0], {
-        icon: L.divIcon({
-          html: '<div class="start-dot">S</div>',
-          className: '',
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
-        }),
-      }).addTo(this.detailMap);
+      L.marker(latlngs[0], { icon: this._createDivIcon('<div class="start-dot">S</div>', 28) })
+        .addTo(this.detailMap);
 
-      // 종료점
       if (latlngs.length > 1) {
-        L.marker(latlngs[latlngs.length - 1], {
-          icon: L.divIcon({
-            html: '<div class="end-dot">E</div>',
-            className: '',
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
-          }),
-        }).addTo(this.detailMap);
+        L.marker(latlngs[latlngs.length - 1], { icon: this._createDivIcon('<div class="end-dot">E</div>', 28) })
+          .addTo(this.detailMap);
       }
 
       this.detailMap.fitBounds(this.detailPolyline.getBounds(), { padding: [40, 40] });
@@ -159,6 +130,21 @@ const MapManager = {
 
   // ── 공통 유틸 ──────────────────────────────────────────────
 
+  _createMap(containerId) {
+    const map = L.map(containerId, { zoomControl: true, attributionControl: false });
+    L.tileLayer(OSM_TILE_URL, { maxZoom: OSM_TILE_MAX_ZOOM }).addTo(map);
+    return map;
+  },
+
+  _createDivIcon(html, size) {
+    return L.divIcon({
+      html,
+      className: '',
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+  },
+
   _makeMarkerIcon(type) {
     const cfg = this.MARKER_ICONS[type] || this.MARKER_ICONS.note;
     return L.divIcon({
@@ -168,12 +154,5 @@ const MapManager = {
       iconAnchor: [18, 18],
       popupAnchor: [0, -20],
     });
-  },
-
-  // 미니 정적 지도 썸네일 (Canvas 기반 간단 렌더)
-  buildStaticMapUrl(session) {
-    if (!session.route || session.route.length === 0) return null;
-    // OpenStreetMap static tiles는 직접 API가 없으므로 Leaflet.js로 미니맵 렌더링
-    return null;
   },
 };

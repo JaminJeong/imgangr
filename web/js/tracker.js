@@ -2,6 +2,11 @@
  * tracker.js
  * GPS 위치 추적 및 거리 계산
  */
+const GEO_WATCH_OPTIONS = { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 };
+const MAX_ACCURACY_M = 50; // 노이즈 필터: 정확도가 이 값(m) 이상이면 무시
+const MIN_MOVE_M = 3;      // 최소 이동 거리 필터: 이 값(m) 미만 이동은 무시
+const EARTH_RADIUS_M = 6371000;
+
 const Tracker = {
   watchId: null,
   route: [],
@@ -21,11 +26,7 @@ const Tracker = {
     this.watchId = navigator.geolocation.watchPosition(
       (pos) => this._handlePosition(pos),
       (err) => this._handleError(err),
-      {
-        enableHighAccuracy: true,
-        maximumAge: 3000,
-        timeout: 10000,
-      }
+      GEO_WATCH_OPTIONS
     );
     return true;
   },
@@ -51,7 +52,7 @@ const Tracker = {
     this.watchId = navigator.geolocation.watchPosition(
       (pos) => this._handlePosition(pos),
       (err) => this._handleError(err),
-      { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 }
+      GEO_WATCH_OPTIONS
     );
   },
 
@@ -64,14 +65,12 @@ const Tracker = {
       timestamp: pos.timestamp,
     };
 
-    // 노이즈 필터: 정확도가 50m 이상이면 무시
-    if (point.accuracy > 50) return;
+    if (point.accuracy > MAX_ACCURACY_M) return;
 
-    // 최소 이동 거리 필터: 3m 미만 이동은 무시
     if (this.route.length > 0) {
       const last = this.route[this.route.length - 1];
       const dist = this.haversine(last.lat, last.lng, point.lat, point.lng);
-      if (dist < 3) return;
+      if (dist < MIN_MOVE_M) return;
     }
 
     this.route.push(point);
@@ -89,14 +88,13 @@ const Tracker = {
 
   // Haversine 공식: 두 좌표 사이의 거리(m)
   haversine(lat1, lng1, lat2, lng2) {
-    const R = 6371000;
     const toRad = (x) => (x * Math.PI) / 180;
     const dLat = toRad(lat2 - lat1);
     const dLng = toRad(lng2 - lng1);
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return EARTH_RADIUS_M * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   },
 
   // 경로 배열에서 총 이동 거리(m) 계산

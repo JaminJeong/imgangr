@@ -17,7 +17,15 @@ const State = {
   mediaRecorder: null,
   audioChunks: [],
   isRecordingAudio: false,
+  activeMarkerType: 'note',
+  photoDataUrls: [],
+  savedAudioBlob: null,
 };
+
+const MARKER_APT_FIELD_IDS = [
+  'marker-apt-complex', 'marker-apt-dong', 'marker-apt-floor', 'marker-apt-size',
+  'marker-apt-price', 'marker-apt-jeonse', 'marker-apt-direction', 'marker-apt-notes',
+];
 
 // ── 뷰 전환 ──────────────────────────────────────────────────
 
@@ -164,20 +172,19 @@ function initTrackingSession(regionName, initialPos) {
   startTimer();
 
   // GPS 추적 시작
-  Tracker.start(
-    (point, route) => {
-      State.activeSession.route = route;
-      MapManager.updateTrackPosition(point, route);
-      State.activeSession.totalDistance = Tracker.calcTotalDistance(route);
-      document.getElementById('track-distance').textContent =
-        Tracker.formatDistance(State.activeSession.totalDistance);
-    },
-    (err) => showToast(err, 'error')
-  );
+  Tracker.start(handleTrackPositionUpdate, (err) => showToast(err, 'error'));
 
   // 일시정지 버튼
   document.getElementById('btn-pause').textContent = '일시정지';
   document.getElementById('btn-pause').classList.remove('paused');
+}
+
+function handleTrackPositionUpdate(point, route) {
+  State.activeSession.route = route;
+  MapManager.updateTrackPosition(point, route);
+  State.activeSession.totalDistance = Tracker.calcTotalDistance(route);
+  document.getElementById('track-distance').textContent =
+    Tracker.formatDistance(State.activeSession.totalDistance);
 }
 
 // ── 타이머 ────────────────────────────────────────────────────
@@ -206,16 +213,7 @@ function togglePause() {
     State.trackingPaused = false;
     btn.textContent = '일시정지';
     btn.classList.remove('paused');
-    Tracker.resume(
-      (point, route) => {
-        State.activeSession.route = route;
-        MapManager.updateTrackPosition(point, route);
-        State.activeSession.totalDistance = Tracker.calcTotalDistance(route);
-        document.getElementById('track-distance').textContent =
-          Tracker.formatDistance(State.activeSession.totalDistance);
-      },
-      (err) => showToast(err, 'error')
-    );
+    Tracker.resume(handleTrackPositionUpdate, (err) => showToast(err, 'error'));
   } else {
     State.trackingPaused = true;
     btn.textContent = '재개';
@@ -287,14 +285,7 @@ async function openMarkerModal() {
   switchMarkerTab('note');
   document.getElementById('marker-note-text').value = '';
   document.getElementById('marker-photo-preview').innerHTML = '';
-  document.getElementById('marker-apt-complex').value = '';
-  document.getElementById('marker-apt-dong').value = '';
-  document.getElementById('marker-apt-floor').value = '';
-  document.getElementById('marker-apt-size').value = '';
-  document.getElementById('marker-apt-price').value = '';
-  document.getElementById('marker-apt-jeonse').value = '';
-  document.getElementById('marker-apt-direction').value = '';
-  document.getElementById('marker-apt-notes').value = '';
+  MARKER_APT_FIELD_IDS.forEach((id) => { document.getElementById(id).value = ''; });
   document.querySelectorAll('.rating-slider').forEach((s) => {
     s.value = 3;
     s.nextElementSibling.textContent = '3';
@@ -385,8 +376,6 @@ async function saveMarker() {
 }
 
 // ── 사진 처리 ────────────────────────────────────────────────
-
-State.photoDataUrls = [];
 
 function handlePhotoSelect(files) {
   const preview = document.getElementById('marker-photo-preview');

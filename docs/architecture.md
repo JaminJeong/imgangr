@@ -71,8 +71,9 @@
 |--------------|------|-----------|--------|
 | **인프라 계층** | `docker-compose.yml`, `Dockerfile`, `nginx.conf` | 정적 파일 서빙, Gzip 압축, HTTP 캐시, SPA 폴백, 컨테이너 라이프사이클 | Docker, Nginx Alpine |
 | **뷰 (View)** | `web/index.html`, `web/css/style.css` | DOM 구조 정의, 모바일 바텀시트, 모달, 반응형 UI, CSS 변수 | 순수 HTML5/CSS3 |
-| **컨트롤러 (Controller)** | `web/js/app.js` | 화면 전환, 폼 검증, 비즈니스 로직, 오디오 녹음 및 사진 변환 총괄 | Storage, Tracker, MapManager |
+| **컨트롤러 (Controller)** | `web/js/app.js` | 화면 전환, 폼 검증, 비즈니스 로직, 오디오 녹음 및 사진 변환 총괄 | Storage, Tracker, MapManager, Backup |
 | **서비스 (Service)** | `web/js/tracker.js`, `web/js/mapManager.js` | GPS 수신 및 노이즈 필터링, 거리/시간 계산, Leaflet 지도 렌더링 | Geolocation API, Leaflet.js |
+| **서비스 (Service)** | `web/js/backup.js` | 백업 파일 조립/복원, 로컬 폴더 저장, 공유 시트 전달 | Storage, File System Access API, Web Share API |
 | **데이터 (Data)** | `web/js/storage.js` | IndexedDB 트랜잭션, 세션 및 마커 CRUD, 캐스케이딩 삭제 | IndexedDB API |
 
 ---
@@ -163,6 +164,21 @@
 ### 5.2 미디어 저장 처리
 - **사진**: `FileReader.readAsDataURL()`을 통해 JPEG/PNG 파일을 Base64 문자열로 변환하여 IndexedDB에 저장합니다.
 - **음성**: `MediaRecorder` API로 캡처된 오디오 청크를 모아 `Blob` 생성 후 DataURL 형태로 영속화합니다.
+
+### 5.3 백업/복원 (계정 없는 데이터 이동)
+
+IndexedDB는 기기·브라우저에 종속된 저장소이므로, 기기 이전이나 브라우저 데이터 초기화에 대비해 `web/js/backup.js`가 계정 없이 데이터를 이동시키는 경로를 제공합니다.
+
+```
+[app.js] 설정(⚙️) 모달
+   ├─► [backup.js] buildPayload() : Storage에서 전체 세션·마커를 조회해 JSON으로 조립
+   ├─► exportToDownload()      : 파일 다운로드
+   ├─► exportToLocalFolder()   : File System Access API로 로컬 폴더에 저장 (Chromium 전용)
+   ├─► shareBackup()           : Web Share API로 OS 공유 시트(메일 등)에 전달
+   └─► importFromFile()        : 선택한 백업 파일을 restorePayload()로 Storage에 병합
+```
+
+백업 파일의 JSON 스키마는 [데이터 모델 명세서 §6](data-model.md#6-백업-파일-포맷-json-export)에, 배포·공유 방식의 배경은 [배포 및 데이터 백업/공유 가이드](backup-and-deploy.md)에 정리되어 있습니다.
 
 ---
 

@@ -9,7 +9,7 @@
 - [x] `.github/workflows/deploy-pages.yml` — `web/` 변경 시 자동으로 GitHub Pages에 배포
 - [x] 저장소 **Settings → Pages → Source**를 "GitHub Actions"로 지정 완료
 - [x] 배포 확인 완료 — `https://JaminJeong.github.io/imgangr/`
-- [ ] (선택) 커스텀 도메인 연결 시 **Settings → Pages → Custom domain** 입력 및 DNS CNAME 설정
+- [ ] (보류) 커스텀 도메인 연결 — 연결할 도메인이 정해지면 **Settings → Pages → Custom domain**에 입력하고 DNS에 CNAME 레코드를 추가. 지금은 연결할 도메인이 없어 `https://JaminJeong.github.io/imgangr/`를 그대로 사용 중이며, 코드 변경 없이 언제든 나중에 진행 가능
 
 ## 2. 내 파일로 백업/복원
 
@@ -27,8 +27,8 @@
 
 - [x] `shareBackup()` — Web Share API(`navigator.share`)로 백업 파일을 OS 공유 시트에 전달, 사용자가 메일 앱을 고르면 파일 첨부된 새 메일 작성 화면이 열림
 - [x] 미지원 브라우저에서는 버튼을 숨기고 "파일로 저장 후 직접 첨부" 안내 문구 표시 (`isShareSupported()`)
-- [ ] (선택, 미구현) 외부 이메일 API(EmailJS 등) 연동으로 완전 자동 발송 — 제3자 서비스 계정·API 키가 필요해 현재 범위에서는 제외. 필요 시 [docs/backup-and-deploy.md §4](docs/backup-and-deploy.md#4-메일-등으로-공유하기) 참고
+- [x] (구현 안 함, 의도적 제외) 외부 이메일 API(EmailJS 등) 연동 자동 발송 — "계정 없이 각자 데이터를 저장"한다는 설계 목표와 정면으로 배치되고(제3자 서비스 가입·API 키 발급 필요), 에이전트가 사용자 대신 그 계정을 만들 수도 없어 채택하지 않기로 결정. Web Share API 방식으로 목적을 충분히 달성
 
 ## 배포 상태
 
-모든 항목이 코드에 반영되어 `main` 브랜치에 푸시·배포되었습니다. 남은 항목은 커스텀 도메인 연결(선택)과 완전 자동 이메일 발송(선택, 제3자 계정 필요) 정도이며, 핵심 기능(배포·백업·복원·공유)은 별도 설정 없이 바로 사용 가능합니다.
+핵심 기능(배포·백업·복원·공유)은 모두 코드에 반영되어 `main` 브랜치에 푸시·배포까지 완료되었고 별도 설정 없이 바로 사용 가능합니다. 유일하게 남은 커스텀 도메인 연결은 **보류 상태**입니다 — 연결할 도메인 자체가 아직 없어서이며(코드나 설정 문제 아님), 도메인이 정해지면 그때 진행하면 됩니다.

@@ -209,3 +209,29 @@ CREATE TABLE markers (
 2. **미디어 저장 방식**: 대용량 Base64 DataURL 문자열 대신 S3/R2 오브젝트 스토리지의 CDN URL 문자열만 JSONB에 보관하여 DB 부하를 절감합니다.
 
 관련 상세 백엔드 아키텍처는 [docs/backend.md](backend.md)를 참고하세요.
+
+---
+
+## 6. 백업 파일 포맷 (JSON Export)
+
+`web/js/backup.js`가 파일 저장/복원/공유에 사용하는 백업 파일은 IndexedDB의 `sessions`·`markers` 두 오브젝트 스토어 전체를 하나의 JSON으로 직렬화한 것입니다.
+
+```typescript
+interface BackupFile {
+  version: number;       // 백업 포맷 버전 (현재 1)
+  exportedAt: number;    // 백업 생성 시각 (Unix Timestamp, ms)
+  sessions: Session[];   // 2절의 Session 배열 전체
+  markers: Marker[];     // 3절의 Marker 배열 전체 (모든 세션 통합)
+}
+```
+
+### 복원 동작
+
+`Backup.restorePayload()`는 배열을 순회하며 `Storage.saveSession()` / `Storage.saveMarker()`(IndexedDB `put`)를 그대로 호출합니다. `put`은 같은 `id`가 있으면 덮어쓰므로:
+
+- **다른 기기로 이전**: 빈 IndexedDB에 복원하면 그대로 전체 기록이 채워집니다.
+- **같은 기기에 재복원**: 이미 존재하는 세션/마커는 백업 시점 내용으로 덮어써지고, 백업 이후 새로 추가된 로컬 기록은 유지됩니다(삭제된 기록이 백업에 있었다면 다시 살아날 수 있음에 유의).
+
+포맷 확장(v2 등)이 필요해지면 `version` 필드로 분기하여 이전 백업 파일과의 하위 호환을 유지할 수 있습니다.
+
+관련 내용은 [배포 및 데이터 백업/공유 가이드](backup-and-deploy.md)를 참고하세요.

@@ -17,6 +17,7 @@ imgangr/
 │
 ├── web/                        # 웹 클라이언트 및 Nginx 정적 서빙
 │   ├── index.html              # 단일 페이지 애플리케이션(SPA) 진입점 마크업
+│   ├── .nojekyll               # GitHub Pages가 Jekyll 처리를 건너뛰게 하는 빈 파일
 │   ├── Dockerfile              # 경량 Nginx 기반 컨테이너 빌드 정의
 │   ├── nginx.conf              # Nginx 웹 서버 설정 (Gzip, 캐싱, SPA 라우팅)
 │   ├── css/
@@ -40,7 +41,7 @@ imgangr/
 │   └── project-structure.md    # 프로젝트 구조 (본 문서)
 │
 ├── .gitignore                  # Git 버전 관리 제외 규칙
-├── TASK.md                     # 배포/구글 동기화 작업 체크리스트 (수동 설정 항목 포함)
+├── TASK.md                     # 배포 및 백업/공유 기능 작업 체크리스트
 └── README.md                   # 프로젝트 개요 및 빠른 시작 안내
 ```
 
@@ -66,6 +67,7 @@ imgangr/
 | `Dockerfile` | Alpine Linux 기반 Nginx 1.27 이미지에 정적 파일을 복사하고 헬스체크를 설정하는 도커 명세 |
 | `nginx.conf` | Gzip 압축, 에셋 캐시(7일), SPA 라우팅 폴백(`try_files`), 보안 파일 접근 차단 설정 |
 | `index.html` | SPA 구조의 모든 뷰(홈, 추적, 기록 목록, 상세)와 바텀시트 모달을 포함하는 단일 마크업 |
+| `.nojekyll` | GitHub Pages 배포 시 Jekyll 처리를 건너뛰도록 하는 빈 마커 파일 |
 | `css/style.css` | CSS Custom Properties 기반 디자인 토큰, Flex/Grid 레이아웃, 모바일 바텀시트 및 반응형 스타일 |
 | `js/storage.js` | 브라우저 `IndexedDB`(`imgangr_db`)를 Promise 기반으로 래핑한 로컬 CRUD 데이터 계층 |
 | `js/tracker.js` | `navigator.geolocation` 위치 수신, 50m 노이즈 필터, 3m 이동 필터, Haversine 거리 계산 |

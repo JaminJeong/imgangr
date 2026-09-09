@@ -22,11 +22,10 @@ imgangr/
 │   ├── css/
 │   │   └── style.css           # 모바일 퍼스트 반응형 스타일 & 디자인 시스템 토큰
 │   └── js/
-│       ├── config.js           # 배포 설정값 (GOOGLE_CLIENT_ID 등)
 │       ├── storage.js          # IndexedDB 로컬 영속화 계층
 │       ├── tracker.js          # Geolocation 기반 GPS 추적 및 거리 계산
 │       ├── mapManager.js       # Leaflet.js 지도 엔진 인스턴스 관리
-│       ├── cloudSync.js        # 구글 로그인/드라이브 백업 및 로컬 백업 대체 수단
+│       ├── backup.js           # 파일 백업/복원, 로컬 폴더 저장, 공유하기
 │       └── app.js              # 전역 상태, 뷰 전환, UI 이벤트 컨트롤러
 │
 ├── docs/                       # 프로젝트 기술 및 기획 문서
@@ -36,7 +35,7 @@ imgangr/
 │   ├── data-model.md           # 데이터 모델 및 스토리지 명세
 │   ├── frontend.md             # 프론트엔드 기술 명세서
 │   ├── backend.md              # 백엔드 & 인프라 기술 명세서
-│   ├── cloud-sync.md           # 배포 및 구글 클라우드 동기화 가이드
+│   ├── backup-and-deploy.md    # 배포 및 데이터 백업/공유 가이드
 │   ├── glossary.md             # 비전공자를 위한 용어 설명서
 │   └── project-structure.md    # 프로젝트 구조 (본 문서)
 │
@@ -71,8 +70,7 @@ imgangr/
 | `js/storage.js` | 브라우저 `IndexedDB`(`imgangr_db`)를 Promise 기반으로 래핑한 로컬 CRUD 데이터 계층 |
 | `js/tracker.js` | `navigator.geolocation` 위치 수신, 50m 노이즈 필터, 3m 이동 필터, Haversine 거리 계산 |
 | `js/mapManager.js` | `Leaflet.js` 기반 지도 생성, 실시간 경로 폴리라인 렌더링, 커스텀 마커 핀 제어 |
-| `js/config.js` | `GOOGLE_CLIENT_ID` 등 배포 환경별 설정값 (배포 전 채워 넣는 자리) |
-| `js/cloudSync.js` | Google Identity Services 로그인, `drive.appdata` 백업/복원, JSON 내보내기/가져오기, File System Access API 로컬 폴더 저장 |
+| `js/backup.js` | 백업 파일 조립/복원, 다운로드·File System Access API 로컬 폴더 저장, Web Share API 공유 |
 | `js/app.js` | 앱 전역 상태(`State`) 관리, 화면 전환, 녹음/사진 미디어 처리, 폼 검증, 이벤트 바인딩 |
 
 ### 2.4 문서 디렉토리 (`docs/`)
@@ -85,6 +83,6 @@ imgangr/
 | [`data-model.md`](data-model.md) | IndexedDB 스토어 구조(Session, Marker, Point), 필드 정의 및 백엔드 스키마 매핑 |
 | [`frontend.md`](frontend.md) | 프론트엔드 핵심 기술, Web API(GPS, IDB, Audio, File) 활용법, 모듈 인터페이스 |
 | [`backend.md`](backend.md) | 현재의 Nginx/Docker 서빙 구조 분석, HTTPS 배포 가이드, v2 클라우드 백엔드 설계 |
-| [`cloud-sync.md`](cloud-sync.md) | 정적 호스팅 배포 방법, 구글 로그인(GIS), 구글 드라이브 백업, 대안 저장 방식 |
+| [`backup-and-deploy.md`](backup-and-deploy.md) | GitHub Pages 배포 방법, 파일 백업/복원, 로컬 폴더 저장, 메일 등으로 공유 |
 | [`glossary.md`](glossary.md) | 비전공자/입문자를 위한 프론트엔드 & 백엔드 핵심 용어 설명 및 일상 비유 |
 | [`project-structure.md`](project-structure.md) | 저장소 전체 파일/폴더 트리 및 구성 요소별 책임 명세 (본 문서) |

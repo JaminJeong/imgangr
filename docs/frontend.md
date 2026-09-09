@@ -79,11 +79,10 @@ web/
 ├── css/
 │   └── style.css       # 디자인 토큰, 레이아웃, 모달/바텀시트, 지도 커스텀 스타일
 └── js/
-    ├── config.js       # 배포 환경 설정값 (GOOGLE_CLIENT_ID 등)
     ├── storage.js      # [Data Layer] IndexedDB Promise 래퍼 인터페이스
     ├── tracker.js      # [Service Layer] GPS 트래커, 필터링, Haversine 거리 계산
     ├── mapManager.js   # [Service Layer] Leaflet.js 지도 인스턴스 라이프사이클 관리
-    ├── cloudSync.js    # [Service Layer] 구글 로그인/드라이브 백업, 로컬 백업 대체 수단
+    ├── backup.js       # [Service Layer] 파일 백업/복원, 로컬 폴더 저장, Web Share 공유
     └── app.js          # [Controller Layer] 전역 상태, 라우팅, UI 렌더링, 이벤트 바인딩
 ```
 

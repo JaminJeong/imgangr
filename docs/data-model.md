@@ -1,157 +1,200 @@
-# 데이터 모델
+# 데이터 모델 명세서 (Data Model Specification)
 
-모든 데이터는 브라우저의 **IndexedDB** (`imgangr_db`, version 1)에 저장됩니다.
-
-## Object Stores
-
-| Store | Key | Index | 설명 |
-|-------|-----|-------|------|
-| `sessions` | `id` | `date` | 임장 세션 (경로 포함) |
-| `markers` | `id` | `sessionId` | 현장 기록 마커 |
+본 문서는 **임장기록 (Imgangr)** 애플리케이션의 클라이언트 로컬 저장소(IndexedDB) 스키마와 향후 클라우드 동기화를 위한 백엔드 데이터베이스 매핑 구조를 기술합니다.
 
 ---
 
-## Session
+## 1. 클라이언트 스토리지: IndexedDB
 
-임장 한 번의 전체 기록을 담는 객체입니다.
+모든 현장 데이터는 브라우저 내장 NoSQL 스토리지인 **IndexedDB** (`imgangr_db`, version 1)에 즉시 트랜잭션 단위로 영속화됩니다.
 
-```js
-{
-  id:            String,   // "session_<timestamp>"  PK
-  regionName:    String,   // 지역명(구). 예) "강남구", "마포구"
-  date:          String,   // "YYYY-MM-DD"
-  startTime:     Number,   // Unix timestamp (ms)
-  endTime:       Number,   // Unix timestamp (ms) | null (진행 중)
-  route:         Point[],  // GPS 경로 포인트 배열 (아래 참조)
-  totalDistance: Number,   // 총 이동 거리 (m)
-  markerCount:   Number,   // 연결된 마커 수
-  overallRating: Number,   // 별점 0~5
-  memo:          String,   // 종합 메모
+### 1.1 Object Stores 요약
+
+| Object Store | Primary Key | Indexes | 설명 |
+|--------------|-------------|---------|------|
+| `sessions` | `id` (String) | `date` | 구 단위 임장 세션 마스터 및 GPS 동선 좌표 배열 |
+| `markers` | `id` (String) | `sessionId` | 세션에 종속된 5종의 현장 기록 (메모/사진/매물/평가/음성) |
+
+---
+
+## 2. Session 엔터티 (임장 세션)
+
+하나의 임장 세션은 특정 구(區)를 대상으로 진행된 이동 기록과 통계를 포함합니다.
+
+```typescript
+interface Session {
+  id: string;             // 고유 식별자 ("session_<timestamp>", e.g. "session_1710650000000")
+  regionName: string;     // 대상 구(區) 명칭 (e.g. "강남구", "마포구")
+  date: string;           // 생성 일자 ("YYYY-MM-DD")
+  startTime: number;      // 시작 시각 (Unix Timestamp, ms)
+  endTime: number | null; // 종료 시각 (Unix Timestamp, ms, 진행 중인 경우 null)
+  route: Point[];         // GPS 궤적 좌표 배열
+  totalDistance: number;  // 누적 이동 거리 (단위: 미터)
+  markerCount: number;    // 연결된 총 마커 수
+  overallRating: number;  // 종합 별점 평가 (0 ~ 5 정수)
+  memo: string;           // 최종 총평 메모
 }
 ```
 
-### Point (route 배열 원소)
+### 2.1 Point 구조체 (`route` 원소)
 
-```js
-{
-  lat:       Number,   // 위도
-  lng:       Number,   // 경도
-  altitude:  Number,   // 고도 (m) | null
-  accuracy:  Number,   // GPS 정확도 (m)
-  timestamp: Number,   // Unix timestamp (ms)
+```typescript
+interface Point {
+  lat: number;            // 위도 (WGS84, e.g. 37.4979)
+  lng: number;            // 경도 (WGS84, e.g. 127.0276)
+  altitude: number | null;// 고도 (단위: 미터, 수신 불가 시 null)
+  accuracy: number;       // 수신 시점의 GPS 수평 정확도 오차 (단위: 미터)
+  timestamp: number;      // 수신 시각 (Unix Timestamp, ms)
 }
 ```
 
 ---
 
-## Marker
+## 3. Marker 엔터티 (현장 마커)
 
-세션에 속하는 개별 현장 기록입니다. `type`에 따라 추가 필드가 달라집니다.
+임장 도중 특정 좌표에서 남긴 개별 기록입니다. `type` 필드에 따라 하위 페이로드 구조가 분기됩니다.
 
-### 공통 필드
+### 3.1 공통 속성
 
-```js
-{
-  id:        String,   // "marker_<timestamp>"  PK
-  sessionId: String,   // 소속 세션 ID  FK → sessions.id
-  type:      String,   // "note" | "photo" | "apt" | "rate" | "voice"
-  lat:       Number,   // 기록 시점 위도
-  lng:       Number,   // 기록 시점 경도
-  timestamp: Number,   // 기록 시각 (Unix ms)
+```typescript
+interface BaseMarker {
+  id: string;             // 고유 식별자 ("marker_<timestamp>")
+  sessionId: string;      // 소속 세션 ID (외래키, sessions.id 참조)
+  type: 'note' | 'photo' | 'apt' | 'rate' | 'voice';
+  lat: number;            // 기록 시점의 위도
+  lng: number;            // 기록 시점의 경도
+  timestamp: number;      // 기록 생성 시각 (Unix Timestamp, ms)
 }
 ```
 
-### type = `"note"` (메모)
+### 3.2 타입별 세부 스키마
 
-```js
-{
-  ...공통,
-  text: String,   // 메모 본문
+#### 1) `note` (단순 메모)
+```typescript
+interface NoteMarker extends BaseMarker {
+  type: 'note';
+  text: string;           // 메모 본문
 }
 ```
 
-### type = `"photo"` (사진)
-
-```js
-{
-  ...공통,
-  photos:  String[],  // Base64 DataURL 배열
-  caption: String,    // 사진 설명
+#### 2) `photo` (현장 사진)
+```typescript
+interface PhotoMarker extends BaseMarker {
+  type: 'photo';
+  photos: string[];       // Base64 DataURL 문자열 배열 (data:image/jpeg;base64,...)
+  caption: string;        // 사진 설명 및 상황 요약
 }
 ```
 
-### type = `"apt"` (매물 정보)
-
-```js
-{
-  ...공통,
+#### 3) `apt` (매물 정보)
+```typescript
+interface AptMarker extends BaseMarker {
+  type: 'apt';
   aptData: {
-    complexName: String,   // 단지명. 예) "래미안원베일리"  ← 구 단위 임장에서 필수
-    dong:        String,   // 동. 예) "101"
-    floor:       String,   // 층. 예) "15"
-    size:        String,   // 평형/㎡. 예) "84"
-    price:       String,   // 매매가. 예) "15억 5,000"
-    jeonse:      String,   // 전세가. 예) "8억"
-    direction:   String,   // 방향. 예) "남향"
-    notes:       String,   // 특이사항
-  },
+    complexName: string;  // 아파트 단지명 (e.g. "래미안원베일리", "마포래미안푸르지오")
+    dong: string;         // 동 (e.g. "101")
+    floor: string;        // 층 (e.g. "15")
+    size: string;         // 전용면적 또는 평형 (e.g. "84")
+    price: string;        // 호가 / 매매가 (e.g. "15억 5,000")
+    jeonse: string;       // 전세가 (e.g. "8억")
+    direction: string;    // 주 거실 기준 방향 (e.g. "남향", "남동향")
+    notes: string;        // 특이사항 및 중개사 코멘트
+  };
 }
 ```
 
-### type = `"rate"` (현장 평가)
-
-```js
-{
-  ...공통,
+#### 4) `rate` (현장 평가)
+```typescript
+interface RateMarker extends BaseMarker {
+  type: 'rate';
   ratings: {
-    transport:  Number,  // 교통   1~5
-    school:     Number,  // 학군   1~5
-    amenities:  Number,  // 편의시설 1~5
-    noise:      Number,  // 소음   1~5
-    parking:    Number,  // 주차   1~5
-    sunlight:   Number,  // 일조량 1~5
-    view:       Number,  // 조망   1~5
-  },
-  rateNote: String,      // 평가 메모
+    transport: number;    // 교통 편의성 (1 ~ 5)
+    school: number;       // 학군 및 교육 환경 (1 ~ 5)
+    amenities: number;    // 상권 및 생활 편의시설 (1 ~ 5)
+    noise: number;        // 주변 소음 쾌적도 (1 ~ 5)
+    parking: number;      // 주차 공간 여유도 (1 ~ 5)
+    sunlight: number;     // 일조량 및 채광 (1 ~ 5)
+    view: number;         // 단지 배치 및 조망 (1 ~ 5)
+  };
+  rateNote: string;       // 채점 이유 및 현장 메모
 }
 ```
 
-### type = `"voice"` (음성 메모)
-
-```js
-{
-  ...공통,
-  audioDataUrl: String,  // Base64 DataURL (audio/webm)
+#### 5) `voice` (음성 메모)
+```typescript
+interface VoiceMarker extends BaseMarker {
+  type: 'voice';
+  audioDataUrl: string;   // Base64 DataURL 문자열 (data:audio/webm;base64,...)
 }
 ```
 
 ---
 
-## 관계 다이어그램
+## 4. 엔터티 관계 다이어그램 (ERD)
 
 ```
-sessions (구 단위 임장 1회)
-   │  regionName: "강남구"
-   │  1 ──── N markers
-   │                 │
-   │ id ─────────── sessionId
-   │
-   └─ route: Point[]        (세션 내 배열로 내장)
-
-markers (apt 타입)
-   └─ aptData.complexName   (방문한 개별 단지명 — 1 세션에 N개 단지 기록 가능)
+┌─────────────────────────────────────────────────────────────┐
+│                      Session (세션)                         │
+│  - id (PK)                                                  │
+│  - regionName: "강남구"                                      │
+│  - route: Point[]                                           │
+│  - totalDistance, overallRating, memo                       │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ 1
+                               │
+                               │ N (Cascade Delete)
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       Marker (마커)                         │
+│  - id (PK)                                                  │
+│  - sessionId (FK -> Session.id)                             │
+│  - type: 'note' | 'photo' | 'apt' | 'rate' | 'voice'        │
+│  - lat, lng, timestamp                                      │
+│  - [type-specific payload]:                                 │
+│      ├── text (note)                                        │
+│      ├── photos[], caption (photo)                          │
+│      ├── aptData { complexName, dong, price... } (apt)      │
+│      ├── ratings { transport, school... }, rateNote (rate)  │
+│      └── audioDataUrl (voice)                               │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 저장 용량 참고
+## 5. 차세대 백엔드(PostgreSQL + PostGIS) 매핑 구조
 
-| 데이터 | 예상 크기 |
-|--------|----------|
-| GPS 포인트 1개 | ~150 Bytes |
-| 1시간 임장 경로 (600포인트) | ~90 KB |
-| JPEG 사진 1장 (리사이즈 없음) | 500 KB ~ 3 MB |
-| 음성 메모 1분 (webm) | ~100 KB |
+향후 클라우드 동기화(v2.0) 도입 시 로컬 IndexedDB의 비정규화 객체는 공간 지리 쿼리를 위해 아래와 같은 RDBMS 테이블 구조로 정규화되어 저장됩니다.
 
-브라우저별 IndexedDB 용량 한도는 일반적으로 디스크 여유 공간의 60% 수준이나,
-사진을 원본 크기로 다수 첨부할 경우 한도에 도달할 수 있습니다.
+```sql
+-- 세션 테이블 (WGS84 LineString 지리공간 타입 활용)
+CREATE TABLE sessions (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id UUID NOT NULL,
+    region_name VARCHAR(100) NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ,
+    route_geom GEOMETRY(LineString, 4326),  -- Point[] 배열을 PostGIS LineString으로 변환
+    total_distance DOUBLE PRECISION DEFAULT 0,
+    overall_rating INTEGER CHECK (overall_rating BETWEEN 0 AND 5),
+    memo TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 마커 테이블 (WGS84 Point 지리공간 타입 + JSONB 페이로드)
+CREATE TABLE markers (
+    id VARCHAR(64) PRIMARY KEY,
+    session_id VARCHAR(64) REFERENCES sessions(id) ON DELETE CASCADE,
+    type VARCHAR(20) NOT NULL,
+    location GEOMETRY(Point, 4326) NOT NULL, -- lat, lng를 PostGIS Point로 변환
+    timestamp TIMESTAMPTZ NOT NULL,
+    payload JSONB NOT NULL,                  -- 세부 필드는 JSONB로 보관하여 유연성 확보
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 변환 시 주요 변경점:
+1. **GPS 경로(`Point[]`)**: 점들의 단순 배열에서 PostGIS `LineString` 지리 객체로 변환되어 공간 길이 계산(`ST_Length`) 및 경로 교차 분석이 가능해집니다.
+2. **미디어 저장 방식**: 대용량 Base64 DataURL 문자열 대신 S3/R2 오브젝트 스토리지의 CDN URL 문자열만 JSONB에 보관하여 DB 부하를 절감합니다.
+
+관련 상세 백엔드 아키텍처는 [docs/backend.md](backend.md)를 참고하세요.

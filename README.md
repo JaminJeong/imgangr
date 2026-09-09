@@ -73,7 +73,10 @@ python3 -m http.server 8080
 - [사용법 가이드](docs/usage.md)
 - [프로젝트 구조](docs/project-structure.md)
 - [아키텍처](docs/architecture.md)
+- [프론트엔드 기술 명세서](docs/frontend.md)
+- [백엔드 & 인프라 기술 명세서](docs/backend.md)
 - [데이터 모델](docs/data-model.md)
+- [비전공자를 위한 용어 설명서](docs/glossary.md)
 
 ---
 
